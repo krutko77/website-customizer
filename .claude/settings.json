@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep \"ghp_\" .git/config; echo \"---\"; sed -i '/ghp_/d' .git/config; grep -c \"ghp_\" .git/config; cat .git/config)",
+      "Bash(git checkout *)",
+      "Bash(bash scripts/snapshot.sh \"завершение сессии 2026-08-11: проверка Chromium, заполнение CLAUDE.md, подключение GitHub\")"
+    ],
+    "additionalDirectories": [
+      "/home/my_workspace/website-customizer/.git"
+    ]
+  }
+}
