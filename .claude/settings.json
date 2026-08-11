@@ -7,7 +7,9 @@
       "Bash(curl -s -D - -o /tmp/es-trans-home.html https://es-trans.ru/ --max-time 20 -L)",
       "Bash(echo \"=== EXIT CODE: $? ===\")",
       "Bash(cp /tmp/es-trans-index.html /home/my_workspace/website-customizer/sites/es-trans-ru/cookie-banner/site-snapshot-index.html *)",
-      "Bash(node -e \"require\\('./lib/helpers'\\).detectDevServers\\(\\).then\\(s => console.log\\(JSON.stringify\\(s\\)\\)\\)\")"
+      "Bash(node -e \"require\\('./lib/helpers'\\).detectDevServers\\(\\).then\\(s => console.log\\(JSON.stringify\\(s\\)\\)\\)\")",
+      "Bash(curl -sI https://es-trans.ru/js/cookie-banner.js)",
+      "Bash(curl -sI https://es-trans.ru/css/cookie-banner.css)"
     ],
     "additionalDirectories": [
       "/home/my_workspace/website-customizer/.git",
