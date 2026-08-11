@@ -19,7 +19,10 @@
       "Bash(node run.js /tmp/playwright-test-cookie-banner.js)",
       "Bash(pkill -f \"http.server 8791\")",
       "Bash(rm -f /home/my_workspace/website-customizer/.claude/skills/playwright-skill/.temp-execution-*.js *)",
-      "Bash(bash scripts/snapshot.sh \"добавлен cookie-consent баннер для es-trans.ru: cookie-banner.js/css, инструкция по внедрению, блокировка Метрики до согласия\")"
+      "Bash(bash scripts/snapshot.sh \"добавлен cookie-consent баннер для es-trans.ru: cookie-banner.js/css, инструкция по внедрению, блокировка Метрики до согласия\")",
+      "Bash(grep -v \"\\\\.pack$\")",
+      "Bash(git fetch *)",
+      "Bash(bash scripts/snapshot.sh \"фикс upstream-трекинга main после пуша, ротация GitHub PAT\")"
     ],
     "additionalDirectories": [
       "/home/my_workspace/website-customizer/.claude/skills/playwright-skill"
