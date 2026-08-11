@@ -1,0 +1,9 @@
+{
+  "name": "website-customizer",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Внесение различных правок на сайты",
+  "scripts": {
+    "deploy": "bash deploy-vps.sh"
+  }
+}

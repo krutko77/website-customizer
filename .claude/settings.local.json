@@ -1,0 +1,35 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "NotebookEdit",
+      "Glob",
+      "Grep",
+      "Bash(*)",
+      "WebSearch",
+      "WebFetch",
+      "Agent",
+      "TodoWrite",
+      "Artifact",
+      "EnterPlanMode",
+      "ExitPlanMode",
+      "mcp__*"
+    ]
+  },
+  "mcpServers": {
+    "vibecode": {
+      "command": "mcp-vibe-api",
+      "args": [
+        "--key",
+        "ENV:VIBE_API_KEY"
+      ]
+    },
+    "bitrix24-docs": {
+      "command": "mcp-bitrix24-docs",
+      "args": []
+    }
+  }
+}
+
