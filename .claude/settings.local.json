@@ -15,7 +15,14 @@
       "Artifact",
       "EnterPlanMode",
       "ExitPlanMode",
-      "mcp__*"
+      "Bash(curl -s -A \"Mozilla/5.0\" https://es-trans.ru/ -o /tmp/es-trans-index.html -w \"HTTP %{http_code}, size %{size_download} bytes\\\\n\")",
+      "Bash(node run.js /tmp/playwright-test-cookie-banner.js)",
+      "Bash(pkill -f \"http.server 8791\")",
+      "Bash(rm -f /home/my_workspace/website-customizer/.claude/skills/playwright-skill/.temp-execution-*.js *)",
+      "Bash(bash scripts/snapshot.sh \"добавлен cookie-consent баннер для es-trans.ru: cookie-banner.js/css, инструкция по внедрению, блокировка Метрики до согласия\")"
+    ],
+    "additionalDirectories": [
+      "/home/my_workspace/website-customizer/.claude/skills/playwright-skill"
     ]
   },
   "mcpServers": {
