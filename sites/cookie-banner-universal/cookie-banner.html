@@ -1,0 +1,100 @@
+<!--
+  Примеры разметки для универсального cookie-баннера.
+  Это не самостоятельная страница — набор фрагментов для копирования в
+  проект нового сайта. Подробности — в README.md рядом.
+-->
+
+<!-- ============================================================ -->
+<!-- 1) <head>: обёртка счётчика(ов) аналитики.                     -->
+<!--    Пример — Яндекс.Метрика. Для Google Analytics/GTM принцип   -->
+<!--    тот же: ВСЯ загрузка скрипта-счётчика должна быть внутри    -->
+<!--    window.__cbInitAnalytics, не только вызов инициализации.    -->
+<!-- ============================================================ -->
+<script type="text/javascript">
+	window.__cbInitAnalytics = function () {
+		if (window.__cbAnalyticsInited) return;
+		window.__cbAnalyticsInited = true;
+
+		// --- Яндекс.Метрика ---
+		(function(m, e, t, r, i, k, a) {
+			m[i] = m[i] || function() {
+				(m[i].a = m[i].a || []).push(arguments)
+			};
+			m[i].l = 1 * new Date();
+			for (var j = 0; j < document.scripts.length; j++) {
+				if (document.scripts[j].src === r) {
+					return;
+				}
+			}
+			k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+		})(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=XXXXXXXX', 'ym');
+
+		ym('XXXXXXXX', 'init', {
+			ssr: true,
+			webvisor: true,
+			clickmap: true,
+			ecommerce: 'dataLayer',
+			accurateTrackBounce: true,
+			trackLinks: true
+		});
+
+		// --- Пример: Google Analytics / gtag.js (если нужен) ---
+		// var gaScript = document.createElement('script');
+		// gaScript.async = true;
+		// gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX';
+		// document.head.appendChild(gaScript);
+		// window.dataLayer = window.dataLayer || [];
+		// function gtag() { dataLayer.push(arguments); }
+		// gtag('js', new Date());
+		// gtag('config', 'G-XXXXXXXXXX');
+	};
+</script>
+<noscript>
+	<div><img src="https://mc.yandex.ru/watch/XXXXXXXX" style="position:absolute; left:-9999px;" alt="" /></div>
+</noscript>
+
+<!-- ============================================================ -->
+<!-- 2) <head> или перед </body>: подключение стилей и скрипта     -->
+<!--    самого баннера.                                             -->
+<!-- ============================================================ -->
+<link rel="stylesheet" href="/css/cookie-banner.css">
+<!-- ... остальной контент страницы ... -->
+<script src="/js/cookie-banner.js" defer></script>
+
+
+<!-- ============================================================ -->
+<!-- 3) Сценарий B (Bitrix24): заглушка вместо формы.               -->
+<!--    Было (инлайн-скрипт формы грузится сразу, безусловно):     -->
+<!--                                                                 -->
+<!--  <div class="popup__text">                                     -->
+<!--    <script async data-b24-form="inline/16/xxxxxx"              -->
+<!--            data-skip-moving="true">                             -->
+<!--      (function(w, d, u) {                                       -->
+<!--        var s = d.createElement('script');                       -->
+<!--        s.async = true;                                          -->
+<!--        s.src = u + '?' + (Date.now() / 180000 | 0);              -->
+<!--        var h = d.getElementsByTagName('script')[0];              -->
+<!--        h.parentNode.insertBefore(s, h);                          -->
+<!--      })(window, document,                                        -->
+<!--         'https://cdn-ru.bitrix24.ru/XXXXXXXXX/crm/form/loader_16.js'); -->
+<!--    </script>                                                    -->
+<!--  </div>                                                          -->
+<!--                                                                 -->
+<!--    Стало (заглушка + id для программной вставки из JS):        -->
+<!-- ============================================================ -->
+<div class="popup__text" id="b24-form-mount">
+	<p class="b24-form-pending-notice">
+		Форма станет доступна после того, как вы примете или откажетесь от
+		использования cookie — закройте это окно и сделайте выбор в баннере
+		внизу страницы.
+	</p>
+</div>
+
+<!--
+  В cookie-banner.js для этого сценария выставить:
+    ENABLE_BITRIX_GATE: true,
+    BITRIX_FORM_ID: 'inline/16/xxxxxx',   // взять из исходного инлайн-скрипта
+    BITRIX_APP_ID: 'xxxxxxxxx',           // ID приложения — тоже из инлайн-скрипта,
+                                            // часть пути перед /crm/form/loader_16.js
+    BITRIX_MOUNT_ID: 'b24-form-mount'
+-->
