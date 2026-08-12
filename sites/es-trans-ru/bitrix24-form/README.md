@@ -111,11 +111,14 @@ cookie только после вашего согласия», но факти�
 }
 ```
 
-## Шаг 3 — script.js: отложенная загрузка формы
+## Шаг 3 — cookie-banner.js: отложенная загрузка формы
 
-`cookie-banner.js` в этом репозитории (`../cookie-banner/cookie-banner.js`)
-уже обновлён под эту логику — сверяйте с ним построчно. Кратко, что
-добавилось в реальный `script.js` клиента:
+Готовый файл целиком, с уже внесёнными правками — **[cookie-banner-b24.js](./cookie-banner-b24.js)**.
+Просто замените им текущий `js/cookie-banner.js` в сборке (он идентичен
+`../cookie-banner/cookie-banner.js`, но лежит здесь под именем `-b24`
+для ясности, что это версия с патчем Bitrix24).
+
+Кратко, что в нём изменилось относительно версии без Bitrix24-патча:
 
 1. Новая функция `initBitrixFormIfAllowed()` — вставляет `loader_16.js`
    с теми же атрибутами (`data-b24-form`, `data-skip-moving`), что были
@@ -127,19 +130,34 @@ function initBitrixFormIfAllowed() {
 	window.__esTransBitrixFormInited = true;
 
 	var mount = document.getElementById('b24-form-mount');
-	if (mount) {
-		mount.innerHTML = '';
-	}
+	if (!mount) return;
+
+	mount.innerHTML = '';
 
 	var s = document.createElement('script');
 	s.async = true;
 	s.setAttribute('data-b24-form', 'inline/16/nzutcg');
 	s.setAttribute('data-skip-moving', 'true');
 	s.src = 'https://cdn-ru.bitrix24.ru/b21839048/crm/form/loader_16.js?' + (Date.now() / 180000 | 0);
-	var h = document.getElementsByTagName('script')[0];
-	h.parentNode.insertBefore(s, h);
+	mount.appendChild(s);
 }
 ```
+
+> **Исправлена ошибка первой версии патча** (обнаружена после первого
+> деплоя на прод): скрипт нужно вставлять **внутрь `#b24-form-mount`**
+> через `mount.appendChild(s)`, а НЕ рядом с первым `<script>` страницы
+> через `getElementsByTagName('script')[0].parentNode.insertBefore(...)`.
+> Причина: при `data-skip-moving="true"` виджет Bitrix24 рендерит себя
+> рядом с тем DOM-узлом, где физически стоит сам `<script>`. Первый
+> `<script>` на странице лежит в `<head>` — поэтому форма отрисовывалась
+> в `<head>` (невидимо), а попап оставался пустым, хотя куки и запросы к
+> `bitrix24.ru` уже появлялись (само согласие и загрузка скрипта
+> работали правильно, проблема была только в месте рендера формы). В
+> оригинальном инлайн-варианте бага не было, потому что `<script>`
+> физически лежал внутри `.popup__text` — тот же эффект теперь
+> достигается вставкой в `#b24-form-mount`. Исправление подтверждено
+> тестом: после фикса форма (6 полей ввода) рендерится внутри
+> `#b24-form-mount`, а не в `<head>`.
 
 2. Вызов `initBitrixFormIfAllowed()` добавлен в **три** места, где уже
    решается судьба согласия (в отличие от Метрики, которая грузится
@@ -190,8 +208,14 @@ banner.querySelector('.cookie-banner__btn--decline').addEventListener('click', f
 3. Вкладка Network — убедиться, что запросов к `cdn-ru.bitrix24.ru` и
    `es-trans.bitrix24.ru` нет вообще, пока баннер не закрыт.
 4. Нажать «Принимаю» — открыть попап с формой снова, убедиться, что
-   форма теперь рендерится и работает; в Network должны появиться
-   запросы к `bitrix24.ru`.
+   форма теперь **видна внутри попапа** (а не просто присутствует
+   где-то в DOM — именно видна пользователю в `#b24-form-mount`) и
+   работает; в Network должны появиться запросы к `bitrix24.ru`. Если
+   попап после согласия пустой при том, что куки/запросы к bitrix24.ru
+   уже появились — это признак старого бага с местом вставки `<script>`
+   (см. врезку в Шаге 3), проверить, что в коде именно
+   `mount.appendChild(s)`, а не вставка рядом с
+   `getElementsByTagName('script')[0]`.
 5. Повторить с чистого состояния и нажать «Отказаться» вместо
    «Принимаю» — форма также должна стать доступна (в отличие от
    Метрики, которая при отказе не подключается).
