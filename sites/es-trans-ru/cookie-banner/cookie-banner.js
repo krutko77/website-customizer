@@ -40,6 +40,32 @@
 		}
 	}
 
+	// Форма заявки Bitrix24 (data-b24-form) грузится отдельным скриптом с
+	// cdn-ru.bitrix24.ru и сама решает, когда трекать свою аналитику — до
+	// этого патча она стартовала сразу при загрузке страницы, до любого
+	// выбора в cookie-баннере. Теперь скрипт вставляется только после
+	// того, как пользователь нажал «Принимаю» или «Отказаться» (после
+	// ЛЮБОГО выбора — форма нужна для приёма заявок, не только аналитики).
+	// См. bitrix24-form/README.md — там же патч для HTML-заглушки на
+	// месте формы (#b24-form-mount) и подключение loader_16.js.
+	function initBitrixFormIfAllowed() {
+		if (window.__esTransBitrixFormInited) return;
+		window.__esTransBitrixFormInited = true;
+
+		var mount = document.getElementById('b24-form-mount');
+		if (mount) {
+			mount.innerHTML = '';
+		}
+
+		var s = document.createElement('script');
+		s.async = true;
+		s.setAttribute('data-b24-form', 'inline/16/nzutcg');
+		s.setAttribute('data-skip-moving', 'true');
+		s.src = 'https://cdn-ru.bitrix24.ru/b21839048/crm/form/loader_16.js?' + (Date.now() / 180000 | 0);
+		var h = document.getElementsByTagName('script')[0];
+		h.parentNode.insertBefore(s, h);
+	}
+
 	function buildBanner() {
 		var banner = document.createElement('div');
 		banner.className = 'cookie-banner';
@@ -88,11 +114,13 @@
 		banner.querySelector('.cookie-banner__btn--accept').addEventListener('click', function () {
 			setConsent('accepted');
 			initMetrikaIfAllowed();
+			initBitrixFormIfAllowed();
 			hide();
 		});
 
 		banner.querySelector('.cookie-banner__btn--decline').addEventListener('click', function () {
 			setConsent('declined');
+			initBitrixFormIfAllowed();
 			hide();
 		});
 	}
@@ -102,11 +130,13 @@
 
 		if (consent === 'accepted') {
 			initMetrikaIfAllowed();
+			initBitrixFormIfAllowed();
 			return;
 		}
 
 		if (consent === 'declined') {
-			return; // пользователь уже отказался — баннер повторно не показываем
+			initBitrixFormIfAllowed(); // форма доступна и при отказе — трекинга это не касается
+			return;
 		}
 
 		showBanner();
