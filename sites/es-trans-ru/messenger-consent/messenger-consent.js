@@ -23,6 +23,8 @@
 	var STORAGE_PREFIX = 'es-trans-messenger-consent-'; // + 'telegram' | 'max'
 	var PRIVACY_URL = '/privacy-policy.html';
 	var AGREEMENT_URL = '/agreement.html';
+	var LANGUAGE_STORAGE_KEY = 'language'; // тот же ключ, что использует app.min.js
+	var DEFAULT_LOCALE = 'ru';
 
 	// Правила определения мессенджера по href. Порядок важен, только если
 	// домены пересекаются (здесь не пересекаются).
@@ -30,6 +32,38 @@
 		{ id: 'telegram', name: 'Telegram', test: /(^|\/\/)(t\.me|telegram\.me)\//i },
 		{ id: 'max', name: 'MAX', test: /(^|\/\/)max\.ru\//i }
 	];
+
+	// Словарь переводов для messenger-consent-*, синхронизирован со словарём,
+	// который сайт сам сгенерировал в js/app.min.js по нашим data-lang (см.
+	// README, раздел про переключатель языка). Основной скрипт сайта (app.min.js)
+	// применяет перевод только один раз — при загрузке страницы/смене select — и
+	// не видит узлы, которые появляются в DOM позже (нашу модалку, создаваемую в
+	// момент клика). Поэтому модалка переводит сама себя при построении, читая
+	// тот же localStorage['language'], что использует переключатель на сайте.
+	var TRANSLATIONS = {
+		'messenger-consent-1': { ru: 'Вы переходите в', en: 'You are moving to', cn: '您即将搬到' },
+		'messenger-consent-2': { ru: 'Общаясь с нами в мессенджере,', en: 'By communicating with us in messenger,', cn: '通过即时通讯软件与我们沟通，' },
+		'messenger-consent-3': { ru: 'вы соглашаетесь с', en: 'you agree with', cn: '你同意' },
+		'messenger-consent-4': { ru: 'Политикой конфиденциальности', en: 'the Privacy Policy', cn: '隐私政策' },
+		'messenger-consent-5': { ru: 'и', en: 'and', cn: '和' },
+		'messenger-consent-6': { ru: 'Согласием на обработку данных', en: 'Consent to data processing', cn: '同意数据处理' },
+		'messenger-consent-7': { ru: 'Отмена', en: 'Cancel', cn: '取消' },
+		'messenger-consent-8': { ru: 'Перейти', en: 'Go to', cn: '前往' }
+	};
+
+	function currentLocale() {
+		try {
+			return localStorage.getItem(LANGUAGE_STORAGE_KEY) || DEFAULT_LOCALE;
+		} catch (e) {
+			return DEFAULT_LOCALE;
+		}
+	}
+
+	function t(dataLang) {
+		var entry = TRANSLATIONS[dataLang];
+		if (!entry) return '';
+		return entry[currentLocale()] || entry[DEFAULT_LOCALE];
+	}
 
 	function detectMessenger(href) {
 		if (!href) return null;
@@ -56,20 +90,20 @@
 		}
 	}
 
-	function makeLink(href, text, dataLang) {
+	function makeLink(href, dataLang) {
 		var a = document.createElement('a');
 		a.className = 'messenger-consent__link';
 		a.setAttribute('data-lang', dataLang);
 		a.href = href;
 		a.target = '_blank';
-		a.textContent = text;
+		a.textContent = t(dataLang);
 		return a;
 	}
 
-	function makeSpan(text, dataLang) {
+	function makeSpan(dataLang) {
 		var span = document.createElement('span');
 		span.setAttribute('data-lang', dataLang);
-		span.textContent = text;
+		span.textContent = t(dataLang);
 		return span;
 	}
 
@@ -78,28 +112,30 @@
 		overlay.className = 'messenger-consent-overlay';
 		overlay.setAttribute('role', 'dialog');
 		overlay.setAttribute('aria-modal', 'true');
-		overlay.setAttribute('aria-label', 'Переход в ' + messenger.name);
+		overlay.setAttribute('aria-label', t('messenger-consent-1') + ' ' + messenger.name);
 
 		var box = document.createElement('div');
 		box.className = 'messenger-consent';
 
 		// Собираем разметку через DOM-методы, а не innerHTML со строкой — так
 		// надёжнее для динамически создаваемых узлов. data-lang проставлены
-		// вручную по той же схеме, что и в cookie-banner.js (см. выше в этом
-		// файле) — на случай, если тексты когда-нибудь подключат к переводу.
+		// вручную по той же схеме, что и в cookie-banner.js, текст переводится
+		// через собственный словарь TRANSLATIONS (см. выше) при построении —
+		// название мессенджера (Telegram/MAX) не переводится, вставляется как
+		// есть отдельным текстовым узлом.
 		var text = document.createElement('p');
 		text.className = 'messenger-consent__text';
-		text.appendChild(makeSpan('Вы переходите в ' + messenger.name + '.', 'messenger-consent-1'));
+		text.appendChild(makeSpan('messenger-consent-1'));
+		text.appendChild(document.createTextNode(' ' + messenger.name + '. '));
+		text.appendChild(makeSpan('messenger-consent-2'));
 		text.appendChild(document.createTextNode(' '));
-		text.appendChild(makeSpan('Общаясь с нами в мессенджере,', 'messenger-consent-2'));
+		text.appendChild(makeSpan('messenger-consent-3'));
 		text.appendChild(document.createTextNode(' '));
-		text.appendChild(makeSpan('вы соглашаетесь с', 'messenger-consent-3'));
+		text.appendChild(makeLink(PRIVACY_URL, 'messenger-consent-4'));
 		text.appendChild(document.createTextNode(' '));
-		text.appendChild(makeLink(PRIVACY_URL, 'Политикой конфиденциальности', 'messenger-consent-4'));
+		text.appendChild(makeSpan('messenger-consent-5'));
 		text.appendChild(document.createTextNode(' '));
-		text.appendChild(makeSpan('и', 'messenger-consent-5'));
-		text.appendChild(document.createTextNode(' '));
-		text.appendChild(makeLink(AGREEMENT_URL, 'Соглашением об обработке данных', 'messenger-consent-6'));
+		text.appendChild(makeLink(AGREEMENT_URL, 'messenger-consent-6'));
 		text.appendChild(document.createTextNode('.'));
 
 		var actions = document.createElement('div');
@@ -109,13 +145,13 @@
 		cancelBtn.type = 'button';
 		cancelBtn.className = 'messenger-consent__btn messenger-consent__btn--cancel';
 		cancelBtn.setAttribute('data-lang', 'messenger-consent-7');
-		cancelBtn.textContent = 'Отмена';
+		cancelBtn.textContent = t('messenger-consent-7');
 
 		var confirmBtn = document.createElement('button');
 		confirmBtn.type = 'button';
 		confirmBtn.className = 'messenger-consent__btn messenger-consent__btn--confirm';
 		confirmBtn.setAttribute('data-lang', 'messenger-consent-8');
-		confirmBtn.textContent = 'Перейти';
+		confirmBtn.textContent = t('messenger-consent-8');
 
 		actions.appendChild(cancelBtn);
 		actions.appendChild(confirmBtn);

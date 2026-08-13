@@ -9,11 +9,13 @@
       "Bash(cp /tmp/es-trans-index.html /home/my_workspace/website-customizer/sites/es-trans-ru/cookie-banner/site-snapshot-index.html *)",
       "Bash(node -e \"require\\('./lib/helpers'\\).detectDevServers\\(\\).then\\(s => console.log\\(JSON.stringify\\(s\\)\\)\\)\")",
       "Bash(curl -sI https://es-trans.ru/js/cookie-banner.js)",
-      "Bash(curl -sI https://es-trans.ru/css/cookie-banner.css)"
+      "Bash(curl -sI https://es-trans.ru/css/cookie-banner.css)",
+      "Bash(git diff *)"
     ],
     "additionalDirectories": [
       "/home/my_workspace/website-customizer/.git",
-      "/tmp"
+      "/tmp",
+      "/home/my_workspace/website-customizer/.claude/skills/playwright-skill"
     ]
   }
 }
