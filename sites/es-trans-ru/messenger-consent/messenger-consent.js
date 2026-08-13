@@ -56,6 +56,15 @@
 		}
 	}
 
+	function makeLink(href, text) {
+		var a = document.createElement('a');
+		a.className = 'messenger-consent__link';
+		a.href = href;
+		a.target = '_blank';
+		a.textContent = text;
+		return a;
+	}
+
 	function buildModal(messenger, onConfirm) {
 		var overlay = document.createElement('div');
 		overlay.className = 'messenger-consent-overlay';
@@ -63,19 +72,40 @@
 		overlay.setAttribute('aria-modal', 'true');
 		overlay.setAttribute('aria-label', 'Переход в ' + messenger.name);
 
-		overlay.innerHTML =
-			'<div class="messenger-consent">' +
-				'<p class="messenger-consent__text">' +
-					'Вы переходите в ' + messenger.name + '. Общаясь с нами в мессенджере, ' +
-					'вы соглашаетесь с ' +
-					'<a class="messenger-consent__link" href="' + PRIVACY_URL + '" target="_blank">Политикой конфиденциальности</a> ' +
-					'и <a class="messenger-consent__link" href="' + AGREEMENT_URL + '" target="_blank">Соглашением об обработке данных</a>.' +
-				'</p>' +
-				'<div class="messenger-consent__actions">' +
-					'<button type="button" class="messenger-consent__btn messenger-consent__btn--cancel">Отмена</button>' +
-					'<button type="button" class="messenger-consent__btn messenger-consent__btn--confirm">Перейти</button>' +
-				'</div>' +
-			'</div>';
+		var box = document.createElement('div');
+		box.className = 'messenger-consent';
+
+		// Собираем разметку через DOM-методы, а не innerHTML со строкой:
+		// на сайте есть скрипт локализации, который постобрабатывает текстовые
+		// узлы (data-lang) и ломается на innerHTML с двумя одинаковыми
+		// `class="messenger-consent__link"` подряд — вторая ссылка уезжала в
+		// текст как escaped-HTML вместо тега. DOM-методы это обходят.
+		var text = document.createElement('p');
+		text.className = 'messenger-consent__text';
+		text.appendChild(document.createTextNode('Вы переходите в ' + messenger.name + '. Общаясь с нами в мессенджере, вы соглашаетесь с '));
+		text.appendChild(makeLink(PRIVACY_URL, 'Политикой конфиденциальности'));
+		text.appendChild(document.createTextNode(' и '));
+		text.appendChild(makeLink(AGREEMENT_URL, 'Соглашением об обработке данных'));
+		text.appendChild(document.createTextNode('.'));
+
+		var actions = document.createElement('div');
+		actions.className = 'messenger-consent__actions';
+
+		var cancelBtn = document.createElement('button');
+		cancelBtn.type = 'button';
+		cancelBtn.className = 'messenger-consent__btn messenger-consent__btn--cancel';
+		cancelBtn.textContent = 'Отмена';
+
+		var confirmBtn = document.createElement('button');
+		confirmBtn.type = 'button';
+		confirmBtn.className = 'messenger-consent__btn messenger-consent__btn--confirm';
+		confirmBtn.textContent = 'Перейти';
+
+		actions.appendChild(cancelBtn);
+		actions.appendChild(confirmBtn);
+		box.appendChild(text);
+		box.appendChild(actions);
+		overlay.appendChild(box);
 
 		function close() {
 			overlay.classList.remove('messenger-consent-overlay--visible');
@@ -88,11 +118,11 @@
 			}, 300);
 		}
 
-		overlay.querySelector('.messenger-consent__btn--cancel').addEventListener('click', close);
+		cancelBtn.addEventListener('click', close);
 		overlay.addEventListener('click', function (e) {
 			if (e.target === overlay) close();
 		});
-		overlay.querySelector('.messenger-consent__btn--confirm').addEventListener('click', function () {
+		confirmBtn.addEventListener('click', function () {
 			close();
 			onConfirm();
 		});
