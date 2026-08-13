@@ -1,0 +1,108 @@
+/*
+ * Стили модалки уведомления о переходе в мессенджер (es-trans.ru).
+ * Палитра — та же, что в cookie-banner.css: акцент #dc2025, серые
+ * #6b6b68 / #969292 / #e8e9e9, шрифт Roboto (уже подключён на сайте).
+ */
+
+.messenger-consent-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 10000;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 16px;
+	background: rgba(0, 0, 0, 0.5);
+	opacity: 0;
+	transition: opacity 0.25s ease;
+}
+
+.messenger-consent-overlay--visible {
+	opacity: 1;
+}
+
+.messenger-consent {
+	max-width: 420px;
+	width: 100%;
+	background: #fff;
+	border-radius: 8px;
+	padding: 24px;
+	font-family: 'Roboto', sans-serif;
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+	transform: translateY(8px);
+	transition: transform 0.25s ease;
+}
+
+.messenger-consent-overlay--visible .messenger-consent {
+	transform: translateY(0);
+}
+
+.messenger-consent__text {
+	margin: 0 0 20px;
+	font-size: 14px;
+	line-height: 1.5;
+	color: #000;
+}
+
+.messenger-consent__link {
+	color: #dc2025;
+	text-decoration: underline;
+}
+
+.messenger-consent__link:hover {
+	text-decoration: none;
+}
+
+.messenger-consent__actions {
+	display: flex;
+	gap: 12px;
+	justify-content: flex-end;
+}
+
+.messenger-consent__btn {
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	padding: 10px 20px;
+	border-radius: 4px;
+	cursor: pointer;
+	border: 1px solid transparent;
+	transition: background-color 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+	white-space: nowrap;
+}
+
+.messenger-consent__btn--confirm {
+	background: #dc2025;
+	color: #fff;
+}
+
+.messenger-consent__btn--confirm:hover {
+	background: #b81a1e;
+}
+
+.messenger-consent__btn--cancel {
+	background: transparent;
+	color: #6b6b68;
+	border-color: #969292;
+}
+
+.messenger-consent__btn--cancel:hover {
+	background: #e8e9e9;
+	color: #000;
+}
+
+@media (max-width: 480px) {
+	.messenger-consent {
+		padding: 20px;
+	}
+
+	.messenger-consent__actions {
+		flex-direction: column-reverse;
+	}
+
+	.messenger-consent__btn {
+		width: 100%;
+		text-align: center;
+		padding: 12px;
+	}
+}
