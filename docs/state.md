@@ -196,3 +196,4 @@ Cookie-баннер, Bitrix24-гейтинг и фикс пробела с cooki
 | Репозиторий GitHub | `github.com/krutko77/website-customizer` (main) |
 | Прод | URL: — · SERVER_ID: — |
 | Универсальный шаблон cookie-баннера | `sites/cookie-banner-universal/` |
+| Чек-лист аудита по 152-ФЗ (2026) | `docs/checklists/152-fz-website-audit.md` |
