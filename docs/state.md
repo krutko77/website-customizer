@@ -197,3 +197,5 @@ Cookie-баннер, Bitrix24-гейтинг и фикс пробела с cooki
 | Прод | URL: — · SERVER_ID: — |
 | Универсальный шаблон cookie-баннера | `sites/cookie-banner-universal/` |
 | Чек-лист аудита по 152-ФЗ (2026) | `docs/checklists/152-fz-website-audit.md` |
+| Аудит es-trans.ru 2026-08-17 | `docs/checklists/audit-es-trans-ru-2026-08-17.md` |
+| Патч отзыва cookie-согласия | `sites/es-trans-ru/cookie-settings/` |
