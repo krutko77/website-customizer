@@ -25,6 +25,7 @@
 	var AGREEMENT_URL = '/agreement.html';
 	var LANGUAGE_STORAGE_KEY = 'language'; // тот же ключ, что использует app.min.js
 	var DEFAULT_LOCALE = 'ru';
+	var SUPPORTED_LOCALES = ['ru', 'en', 'cn']; // тот же список, что в app.min.js
 
 	// Правила определения мессенджера по href. Порядок важен, только если
 	// домены пересекаются (здесь не пересекаются).
@@ -51,12 +52,20 @@
 		'messenger-consent-8': { ru: 'Перейти', en: 'Go to', cn: '前往' }
 	};
 
+	// Повторяет цепочку определения языка из app.min.js:
+	//   localStorage['language'] || navigator.language.slice(0,2) || 'ru',
+	// где значение принимается, только если оно есть в SUPPORTED_LOCALES.
+	// Без фолбэка на navigator.language модалка оставалась бы русской на
+	// странице, которую сайт уже отрисовал по-английски (localStorage пуст).
 	function currentLocale() {
+		var stored = null;
+		try { stored = localStorage.getItem(LANGUAGE_STORAGE_KEY); } catch (e) { }
+		if (stored && SUPPORTED_LOCALES.indexOf(stored) !== -1) return stored;
 		try {
-			return localStorage.getItem(LANGUAGE_STORAGE_KEY) || DEFAULT_LOCALE;
-		} catch (e) {
-			return DEFAULT_LOCALE;
-		}
+			var nav = (navigator.language || '').slice(0, 2).toLowerCase();
+			if (SUPPORTED_LOCALES.indexOf(nav) !== -1) return nav;
+		} catch (e) { }
+		return DEFAULT_LOCALE;
 	}
 
 	function t(dataLang) {

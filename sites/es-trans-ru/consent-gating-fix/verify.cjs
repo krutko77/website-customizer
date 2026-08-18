@@ -163,6 +163,31 @@ async function open(browser, page, consent, lang) {
 		await ctx.close();
 	}
 
+	// --- 6b. язык по navigator.language, когда localStorage пуст ----------
+	//
+	// Сайт определяет язык цепочкой localStorage → navigator.language → ru.
+	// Баннер и заглушка обязаны использовать ТУ ЖЕ цепочку, иначе у гостя
+	// с английским браузером, ни разу не трогавшего переключатель, сайт
+	// будет на en, а наши тексты — на ru. Именно так и было на проде
+	// 18.08.2026 до фикса.
+	console.log('\nязык без localStorage (по локали браузера):');
+	for (const [locale, expectBtn] of [['en-US', 'Show map'], ['ru-RU', 'Показать карту']]) {
+		const ctx = await browser.newContext({ locale });
+		const p = await ctx.newPage();
+		await p.addInitScript(() => localStorage.setItem('es-trans-cookie-consent', 'declined'));
+		await p.goto(`${BASE}/contacts.html`, { waitUntil: 'networkidle', timeout: 45000 });
+		const btn = (await p.locator('.map-placeholder__btn').innerText()).trim();
+		check(`locale=${locale}: заглушка на нужном языке`,
+			btn.toLowerCase() === expectBtn.toLowerCase(), btn);
+		// сверяем с языком самого сайта — они должны совпадать
+		const menu = (await p.locator('[data-lang="header-menu-1"]').first().innerText()).trim();
+		const siteRu = menu.toLowerCase() === 'главная';
+		const phRu = btn.toLowerCase() === 'показать карту';
+		check(`locale=${locale}: язык заглушки совпадает с языком сайта`,
+			siteRu === phRu, `сайт="${menu}" заглушка="${btn}"`);
+		await ctx.close();
+	}
+
 	// --- 7. index.html: Битрикс не грузится до открытия формы -------------
 	for (const consent of ['declined', 'accepted']) {
 		console.log(`\nindex.html — ${consent}, попап не открыт:`);

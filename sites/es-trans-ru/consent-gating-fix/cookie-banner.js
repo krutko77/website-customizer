@@ -130,12 +130,37 @@
 	var MAPS_EXTERNAL_URL = 'https://yandex.ru/maps/?text=' +
 		encodeURIComponent('Химки, Коммунальный проезд, 2');
 
+	// Язык определяется ТОЙ ЖЕ цепочкой, что и в app.min.js:
+	//   localStorage['language'] → navigator.language → 'ru'
+	//
+	// Раньше здесь читался только localStorage, и это давало расхождение:
+	// у посетителя с английской локалью браузера, который ещё ни разу
+	// не трогал переключатель языка, localStorage пуст — сайт уходил
+	// на en по navigator.language, а баннер и заглушка карты оставались
+	// русскими. Поймано на проде 18.08.2026 при locale=en-US.
+	//
+	// Список языков (ru/en/cn) и порядок проверки скопированы из
+	// app.min.js намеренно — если там появится новый язык, поправить
+	// нужно в обоих местах.
+	var SUPPORTED_LANGS = ['ru', 'en', 'cn'];
+
 	function getLang() {
+		var stored = null;
 		try {
-			return localStorage.getItem('language') || DEFAULT_LANG;
+			stored = localStorage.getItem('language');
 		} catch (e) {
-			return DEFAULT_LANG;
+			/* localStorage недоступен — идём дальше по цепочке */
 		}
+		if (stored && SUPPORTED_LANGS.indexOf(stored) !== -1) return stored;
+
+		try {
+			var nav = (navigator.language || '').slice(0, 2).toLowerCase();
+			if (SUPPORTED_LANGS.indexOf(nav) !== -1) return nav;
+		} catch (e) {
+			/* navigator недоступен — вернём язык по умолчанию */
+		}
+
+		return DEFAULT_LANG;
 	}
 
 	function t(key) {
