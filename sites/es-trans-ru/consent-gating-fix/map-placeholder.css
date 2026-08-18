@@ -1,0 +1,97 @@
+/*
+ * Заглушка Яндекс.Карты (патч consent-gating-fix, 18.08.2026)
+ *
+ * Показывается вместо карты, пока пользователь не дал согласие на cookie
+ * или не нажал «Показать карту». Разметку строит cookie-banner.js
+ * (функция buildMapPlaceholder).
+ *
+ * КАК ПОДКЛЮЧИТЬ: правила ниже дописываются в конец `css/style.min.css`
+ * (отдельного файла под cookie-баннер на сайте нет — его стили лежат
+ * там же). Файл минифицирован, но приписанные в конец несжатые правила
+ * ему не мешают. При следующей пересборке стилей из исходников не забудьте
+ * перенести их в исходный .scss/.css, иначе они потеряются.
+ *
+ * Размеры коробки берутся у самой карты: `.contact__map` уже имеет
+ * flex:1 1 50%, а `.contact iframe` — aspect-ratio:580/400. Заглушка
+ * повторяет ту же пропорцию, чтобы при загрузке карты вёрстка не прыгала.
+ *
+ * Цвета — из палитры сайта: #dc2025 (акцент), #6b6b68 (текст), #e8e9e9
+ * (границы), те же значения используются в .cookie-banner.
+ */
+
+.map-placeholder {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+	gap: 12px;
+	aspect-ratio: 580/400;
+	width: 100%;
+	padding: 24px;
+	box-sizing: border-box;
+	text-align: center;
+	background: #f7f7f7;
+	border: 1px solid #e8e9e9;
+	font-family: Roboto, sans-serif;
+}
+
+.map-placeholder__text {
+	margin: 0;
+	max-width: 420px;
+	font-size: 14px;
+	line-height: 1.5;
+	color: #6b6b68;
+}
+
+.map-placeholder__btn {
+	font-family: inherit;
+	font-size: 14px;
+	font-weight: 500;
+	padding: 10px 20px;
+	border: 1px solid transparent;
+	border-radius: 4px;
+	background: #dc2025;
+	color: #fff;
+	cursor: pointer;
+	transition: background-color .15s ease;
+}
+
+.map-placeholder__btn:hover {
+	background: #b81a1e;
+}
+
+.map-placeholder__address {
+	margin: 0;
+	max-width: 420px;
+	font-size: 13px;
+	line-height: 1.5;
+	color: #000;
+}
+
+.map-placeholder__link {
+	font-size: 13px;
+	color: #dc2025;
+	text-decoration: underline;
+}
+
+.map-placeholder__link:hover {
+	text-decoration: none;
+}
+
+/* На узких экранах коробка 580/400 становится слишком низкой для четырёх
+   строк — отпускаем пропорцию и задаём минимальную высоту.
+   47.99875em (≈768px) — брейкпоинт самого сайта: на нём .contact__map
+   расширяется до max-width:100%. Стеклись в колонку блоки чуть раньше,
+   на 61.99875em, но там ширины ещё хватает. */
+@media (max-width: 47.99875em) {
+	.map-placeholder {
+		aspect-ratio: auto;
+		min-height: 260px;
+		padding: 20px 16px;
+		gap: 10px;
+	}
+
+	.map-placeholder__text {
+		font-size: 13px;
+	}
+}
