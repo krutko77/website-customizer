@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /**
  * Обработчик форм обратной связи — es-trans.ru
  * Замена для files/sendmail/sendmail.php
@@ -15,14 +15,16 @@
  * начнут отвечать ошибкой.
  */
 
-declare(strict_types=1);
 
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
-require 'phpmailer/src/Exception.php';
-require 'phpmailer/src/PHPMailer.php';
-require 'phpmailer/src/SMTP.php';
+// Пути ОБЯЗАТЕЛЬНО через __DIR__: относительный require ищет файл от текущей
+// рабочей директории процесса (у PHP-FPM это обычно корень сайта, а не папка
+// скрипта), а не рядом со скриптом. Без __DIR__ — Fatal error и HTTP 500.
+require __DIR__ . '/phpmailer/src/Exception.php';
+require __DIR__ . '/phpmailer/src/PHPMailer.php';
+require __DIR__ . '/phpmailer/src/SMTP.php';
 
 // ------------------------------------------------------------------
 // Конфиг. Путь считается от files/sendmail/ вверх до корня аккаунта.
@@ -173,7 +175,7 @@ if (!$consentSaved) {
 try {
     $mail = new PHPMailer(true);
     $mail->CharSet = 'UTF-8';
-    $mail->setLanguage('ru', 'phpmailer/language/');
+    $mail->setLanguage('ru', __DIR__ . '/phpmailer/language/');
     $mail->IsHTML(true);
 
     $mail->isSMTP();
