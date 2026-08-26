@@ -3,3 +3,6 @@ node_modules/
 data/
 .publish/
 .chat-uploads/
+
+# Временные файлы playwright-skill (run.js копирует скрипты сюда)
+.claude/skills/playwright-skill/.temp-execution-*.js
