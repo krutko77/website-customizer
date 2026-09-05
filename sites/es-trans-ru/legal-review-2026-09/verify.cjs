@@ -179,6 +179,7 @@ const check = (ok, label, detail = '') => results.push({ ok, label, detail });
     return {
       visible: el.classList.contains('cookie-banner--visible'),
       links: [...el.querySelectorAll('a')].map((a) => a.getAttribute('href')),
+      text: (el.querySelector('.cookie-banner__text') || {}).textContent,
       accept: (el.querySelector('.cookie-banner__btn--accept') || {}).textContent,
       decline: (el.querySelector('.cookie-banner__btn--decline') || {}).textContent,
     };
@@ -191,10 +192,26 @@ const check = (ok, label, detail = '') => results.push({ ok, label, detail });
       'В баннере есть ссылка на Политику cookie',
       `ссылки: ${banner.links.join(', ')}`
     );
+    // С 05.09.2026 ссылка ровно одна. Раньше их было три (Политика ПДн,
+    // Согласие, Политика cookie) — если после пересборки Gulp вернётся
+    // старая версия баннера, эта проверка поймает откат.
     check(
-      banner.links.length === 3,
-      'В баннере три ссылки',
-      `найдено ${banner.links.length}`
+      banner.links.length === 1,
+      'В баннере ровно одна ссылка',
+      `найдено ${banner.links.length}: ${banner.links.join(', ')}`
+    );
+    // Текст задан владельцем дословно (05.09.2026) — сверяем целиком,
+    // а не по фрагментам: формулировка согласия юридически значима
+    // (ч. 1 ст. 9 152-ФЗ — согласие конкретное и информированное).
+    const EXPECTED_TEXT =
+      'Мы используем файлы cookie и Яндекс.Метрику для лучшей работы ' +
+      'сайта и аналитики. Продолжая пользоваться сайтом, вы соглашаетесь ' +
+      'с Политикой использования файлов cookie.';
+    const actualText = (banner.text || '').replace(/\s+/g, ' ').trim();
+    check(
+      actualText === EXPECTED_TEXT,
+      'Текст баннера совпадает с утверждённым дословно',
+      `найдено: «${actualText}»`
     );
     check(
       (banner.accept || '').trim() === 'Согласен',

@@ -60,35 +60,33 @@
 	// 26.08.2026). sessionStorage, а не localStorage: согласие действует на
 	// текущий визит и не переписывает общий отказ на аналитику.
 	var MAP_CONSENT_KEY = 'es-trans-map-consent'; // 'granted' | (нет ключа)
-	var PRIVACY_URL = '/privacy-policy.html';
-	var AGREEMENT_URL = '/agreement.html';
+	// В баннере с 05.09.2026 одна ссылка — на Политику cookie. Константы
+	// PRIVACY_URL и AGREEMENT_URL убраны вместе с прежним перечислением
+	// из трёх документов; сами страницы никуда не делись и доступны из подвала.
 	var COOKIE_POLICY_URL = '/cookie-policy.html';
 	var DEFAULT_LANG = 'ru';
 
 	// Значения синхронизированы со словарём сайта в app.min.js
 	// (ключи cookie-banner-1…7), кроме cn у cookie-banner-1 — см. шапку.
 	var TRANSLATIONS = {
+		// Текст задан владельцем 05.09.2026 по рекомендациям юркомпании.
+		// Яндекс.Метрика названа прямо: п. 1 ч. 1 ст. 14 152-ФЗ — субъект
+		// должен знать, кому уходят данные, до того как согласится.
 		'cookie-banner-1': {
-			ru: 'Мы используем файлы cookie для работы сайта и аналитики.',
-			en: 'We use cookies to operate our website and for analytics.',
-			cn: '我们使用 cookie 来运营网站并进行分析。'
+			ru: 'Мы используем файлы cookie и Яндекс.Метрику для лучшей работы сайта и аналитики.',
+			en: 'We use cookies and Yandex.Metrica to improve the website and for analytics.',
+			cn: '我们使用 cookie 和 Yandex.Metrica 来优化网站运行并进行分析。'
 		},
 		'cookie-banner-2': {
 			ru: 'Продолжая пользоваться сайтом, вы соглашаетесь с',
 			en: 'By continuing to use the site, you agree to',
 			cn: '继续使用本网站，即表示您同意'
 		},
-		'cookie-banner-3': {
-			ru: 'Политикой конфиденциальности',
-			en: 'the Privacy Policy',
-			cn: '隐私政策'
-		},
-		'cookie-banner-4': { ru: 'и', en: 'and', cn: '和' },
-		'cookie-banner-5': {
-			ru: 'Согласием на обработку данных',
-			en: 'Consent to data processing',
-			cn: '同意数据处理'
-		},
+		// cookie-banner-3, -4, -5 в баннере БОЛЬШЕ НЕ ИСПОЛЬЗУЮТСЯ (05.09.2026):
+		// в тексте осталась одна ссылка — на Политику cookie (cookie-banner-8).
+		// Из словаря сайта в app.min.js их НЕ удалять: ключи общие, ими
+		// пользуются другие места локализации. Здесь оставлены как справка
+		// о прежней редакции.
 		'cookie-banner-6': { ru: 'Отказаться', en: 'Refuse', cn: '拒绝' },
 		// «Согласен», а не «Принимаю» — формулировка из рекомендаций юркомпании
 		// (04.09.2026) и п. 6.3 Политики cookie. Тот же ключ правится в словаре
@@ -523,16 +521,10 @@
 		text.appendChild(document.createTextNode(' '));
 		text.appendChild(span('cookie-banner-2'));
 		text.appendChild(document.createTextNode(' '));
-		// Перечисление из трёх: «A, B и C». Запятая после первой ссылки,
-		// «и» (cookie-banner-4) — только перед последней. Раньше ссылок
-		// было две и «и» стояло между ними; если оставить его там,
-		// получается «с A и B и C» — поймано на скриншоте.
-		text.appendChild(link(PRIVACY_URL, 'cookie-banner-3'));
-		text.appendChild(document.createTextNode(', '));
-		text.appendChild(link(AGREEMENT_URL, 'cookie-banner-5'));
-		text.appendChild(document.createTextNode(' '));
-		text.appendChild(span('cookie-banner-4'));
-		text.appendChild(document.createTextNode(' '));
+		// Одна ссылка — на Политику cookie (текст владельца от 05.09.2026).
+		// Раньше здесь перечислялись три документа; Политика конфиденциальности
+		// и Согласие на обработку остаются доступны из подвала и из самой
+		// Политики cookie (её п. 1.3 и 9.3 ссылаются на Политику ПДн).
 		text.appendChild(link(COOKIE_POLICY_URL, 'cookie-banner-8'));
 		text.appendChild(document.createTextNode('.'));
 
