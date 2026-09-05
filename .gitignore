@@ -6,3 +6,6 @@ data/
 
 # Временные файлы playwright-skill (run.js копирует скрипты сюда)
 .claude/skills/playwright-skill/.temp-execution-*.js
+
+# Сборки исходников с @@include для локальной проверки (build-local.py)
+sites/**/*.local.html
