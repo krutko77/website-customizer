@@ -186,10 +186,86 @@
 		return DEFAULT_LANG;
 	}
 
+	// Язык, выбранный переключателем в текущем сеансе. Нужен потому, что
+	// сайт пишет localStorage в СВОЁМ обработчике 'change', а порядок
+	// вызова слушателей одного события — это порядок подписки: полагаться
+	// на то, что наш сработает вторым, нельзя. Значение берём прямо из
+	// события; null означает «спросить getLang() как обычно».
+	var currentLang = null;
+
+	function activeLang() {
+		return currentLang || getLang();
+	}
+
 	function t(key) {
 		var entry = TRANSLATIONS[key];
 		if (!entry) return '';
-		return entry[getLang()] || entry[DEFAULT_LANG];
+		return entry[activeLang()] || entry[DEFAULT_LANG];
+	}
+
+	// --- Перевод «на лету» при смене языка --------------------------------
+	//
+	// Баг, найденный на проде 05.09.2026: переключатель языка в шапке не
+	// менял язык баннера. Причина двойная, и обе части лежат вне баннера:
+	//
+	//   1. Обработчик сайта (app.min.js) при смене языка вызывает je(),
+	//      а та перебирает ТОЛЬКО ключи словаря текущей страницы (Re).
+	//      Ключей cookie-banner-* и map-placeholder-* там нет — они живут
+	//      в нашем TRANSLATIONS, — поэтому наши элементы в цикл не попадают.
+	//   2. Сам баннер читал язык лишь один раз, в момент buildBanner().
+	//
+	// Прежние фиксы (18.08) чинили НАЧАЛЬНЫЙ язык — цепочку getLang(); от
+	// переключения уже после отрисовки они не защищали. Отсюда же брался
+	// более неприятный эффект: предупреждение на заглушке карты дорисовыва-
+	// лось в момент клика «Отказаться» и застревало на языке, актуальном
+	// на тот момент, — на странице получалась смесь языков (ч. 1 ст. 9
+	// 152-ФЗ: согласие должно быть информированным).
+	//
+	// Решение: перерисовывать по атрибуту data-lang, который наши элементы
+	// и так проставляют. DOM не пересобирается — узлы остаются те же,
+	// поэтому обработчики кликов и состояние заглушки не теряются.
+	function retranslate() {
+		// querySelectorAll, а не querySelector: у сайта в je() стоит
+		// querySelector, из-за чего он переводит лишь ПЕРВЫЙ элемент с
+		// ключом. Повторять эту ошибку незачем.
+		var nodes = document.querySelectorAll('[data-lang]');
+		Array.prototype.forEach.call(nodes, function (el) {
+			var key = el.getAttribute('data-lang');
+			// Чужие ключи (словарь сайта) не трогаем — их переводит je().
+			if (!TRANSLATIONS[key]) return;
+			el.textContent = t(key);
+		});
+	}
+
+	// Подписка ставится один раз за жизнь страницы.
+	var languageWatchStarted = false;
+
+	function watchLanguage() {
+		if (languageWatchStarted) return;
+		languageWatchStarted = true;
+
+		// Те же две точки, что использует сам сайт: селектор в шапке пишет
+		// localStorage['language'] и зовёт je().
+		var select = document.getElementById('languageSelect');
+		if (select) {
+			select.addEventListener('change', function (e) {
+				var value = e && e.target ? e.target.value : null;
+				// Значение валидируем по тому же списку, что и getLang():
+				// неизвестный язык лучше отдать общей цепочке, чем показать
+				// пустые строки.
+				currentLang = SUPPORTED_LANGS.indexOf(value) !== -1 ? value : null;
+				retranslate();
+			});
+		}
+
+		// Смена языка в соседней вкладке того же домена. Здесь localStorage
+		// уже записан, поэтому значение берём из события, а при его
+		// отсутствии — из хранилища.
+		window.addEventListener('storage', function (e) {
+			if (!e || e.key !== 'language') return;
+			currentLang = SUPPORTED_LANGS.indexOf(e.newValue) !== -1 ? e.newValue : null;
+			retranslate();
+		});
 	}
 
 	function getConsent() {
@@ -386,17 +462,33 @@
 		container.appendChild(frame);
 	}
 
+	// Предупреждение об отказе создаётся в двух местах — при первой отрисовке
+	// заглушки и при дорисовке после клика «Отказаться». Общая функция нужна,
+	// чтобы data-lang не забыли в одном из них.
+	function buildMapWarning() {
+		var warn = document.createElement('p');
+		warn.className = 'map-placeholder__warning';
+		warn.setAttribute('data-lang', 'map-placeholder-5');
+		warn.textContent = t('map-placeholder-5');
+		return warn;
+	}
+
 	function buildMapPlaceholder(container, consent) {
 		var box = document.createElement('div');
 		box.className = 'map-placeholder';
 
+		// data-lang на каждом узле — по нему retranslate() находит элементы
+		// при смене языка. Без атрибута заглушка застывала на языке, который
+		// был актуален в момент отрисовки.
 		var note = document.createElement('p');
 		note.className = 'map-placeholder__text';
+		note.setAttribute('data-lang', 'map-placeholder-1');
 		note.textContent = t('map-placeholder-1');
 
 		var btn = document.createElement('button');
 		btn.type = 'button';
 		btn.className = 'map-placeholder__btn';
+		btn.setAttribute('data-lang', 'map-placeholder-2');
 		btn.textContent = t('map-placeholder-2');
 		btn.addEventListener('click', function () {
 			loadMap(container, true);
@@ -404,6 +496,7 @@
 
 		var addr = document.createElement('p');
 		addr.className = 'map-placeholder__address';
+		addr.setAttribute('data-lang', 'map-placeholder-3');
 		addr.textContent = t('map-placeholder-3');
 
 		var ext = document.createElement('a');
@@ -411,6 +504,7 @@
 		ext.href = MAPS_EXTERNAL_URL;
 		ext.target = '_blank';
 		ext.rel = 'noopener noreferrer';
+		ext.setAttribute('data-lang', 'map-placeholder-4');
 		ext.textContent = t('map-placeholder-4');
 
 		box.appendChild(note);
@@ -418,10 +512,7 @@
 		// При активном отказе предупреждаем до клика: иначе разовое согласие
 		// не является информированным (ч. 1 ст. 9 152-ФЗ).
 		if (consent === 'declined') {
-			var warn = document.createElement('p');
-			warn.className = 'map-placeholder__warning';
-			warn.textContent = t('map-placeholder-5');
-			box.appendChild(warn);
+			box.appendChild(buildMapWarning());
 		}
 
 		box.appendChild(btn);
@@ -473,9 +564,7 @@
 
 		if (consent === 'declined') {
 			if (warn) return;
-			warn = document.createElement('p');
-			warn.className = 'map-placeholder__warning';
-			warn.textContent = t('map-placeholder-5');
+			warn = buildMapWarning();
 			// Порядок как в buildMapPlaceholder: текст, предупреждение, кнопка.
 			var btn = box.querySelector('.map-placeholder__btn');
 			if (btn) box.insertBefore(warn, btn);
@@ -593,6 +682,11 @@
 
 	function start() {
 		var consent = getConsent();
+
+		// Слушатель ставится всегда, а не только когда показан баннер:
+		// заглушка карты живёт на странице и после сделанного выбора,
+		// и её тоже нужно переводить при смене языка.
+		watchLanguage();
 
 		// Форма заявки нужна при любом выборе, поэтому слушатель ставим
 		// всегда. Сам скрипт Bitrix24 подгрузится только когда пользователь
