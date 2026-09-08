@@ -92,9 +92,14 @@ const check = (ok, label, detail = '') => results.push({ ok, label, detail });
     `Почта ${EMAIL} (не ${WRONG_EMAIL} из письма юристов)`
   );
 
-  // Все 8 разделов присутствуют
+  // Все 8 разделов присутствуют (сравниваем textContent из DOM, а не
+  // innerText — на проде h3.soglashenie__title оформлен CSS text-transform:
+  // uppercase, из-за чего innerText возвращает капс и ломает сравнение)
+  const h3Texts = await page.evaluate(() =>
+    [...document.querySelectorAll('h3.soglashenie__title')].map((el) => el.textContent.trim())
+  );
   for (const title of SECTION_TITLES) {
-    check(text.includes(title), `Раздел «${title}» присутствует`);
+    check(h3Texts.includes(title), `Раздел «${title}» присутствует`);
   }
 
   // Третьи лица названы поимённо с ИНН
