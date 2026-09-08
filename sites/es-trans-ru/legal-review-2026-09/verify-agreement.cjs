@@ -96,7 +96,9 @@ const check = (ok, label, detail = '') => results.push({ ok, label, detail });
   // innerText — на проде h3.soglashenie__title оформлен CSS text-transform:
   // uppercase, из-за чего innerText возвращает капс и ломает сравнение)
   const h3Texts = await page.evaluate(() =>
-    [...document.querySelectorAll('h3.soglashenie__title')].map((el) => el.textContent.trim())
+    [...document.querySelectorAll('h3.soglashenie__title')].map((el) =>
+      el.textContent.replace(/\s+/g, ' ').trim()
+    )
   );
   for (const title of SECTION_TITLES) {
     check(h3Texts.includes(title), `Раздел «${title}» присутствует`);

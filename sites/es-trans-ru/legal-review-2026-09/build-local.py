@@ -9,6 +9,7 @@ Gulp (@@include), которые браузер не понимает. Скри�
     python3 build-local.py && node verify.cjs --local
     python3 build-local.py && node verify-privacy.cjs --local
     python3 build-local.py && node verify-agreement.cjs --local
+    python3 build-local.py && node verify-agreement-vacancy.cjs --local
 """
 
 import re
@@ -31,6 +32,11 @@ PAGES = [
         'src': HERE / 'agreement.html',
         'dst': HERE / 'agreement.local.html',
         'title': 'Согласие на обработку данных | ЕС Транс',
+    },
+    {
+        'src': HERE / 'agreement-vacancy.html',
+        'dst': HERE / 'agreement-vacancy.local.html',
+        'title': 'Согласие соискателя на обработку данных | ЕС Транс',
     },
 ]
 
