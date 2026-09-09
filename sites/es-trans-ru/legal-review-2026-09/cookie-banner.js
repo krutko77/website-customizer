@@ -590,6 +590,10 @@
 		el.className = 'cookie-banner__link';
 		el.setAttribute('data-lang', key);
 		el.href = href;
+		// Открывать в новом окне/вкладке: клик по ссылке на Политику не должен
+		// уводить пользователя со страницы, на которой висит баннер согласия.
+		el.target = '_blank';
+		el.rel = 'noopener noreferrer';
 		el.textContent = t(key);
 		return el;
 	}

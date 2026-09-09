@@ -176,9 +176,12 @@ const check = (ok, label, detail = '') => results.push({ ok, label, detail });
   const banner = await page.evaluate(() => {
     const el = document.querySelector('.cookie-banner');
     if (!el) return null;
+    const linkEl = el.querySelector('.cookie-banner__link');
     return {
       visible: el.classList.contains('cookie-banner--visible'),
       links: [...el.querySelectorAll('a')].map((a) => a.getAttribute('href')),
+      linkTarget: linkEl ? linkEl.getAttribute('target') : null,
+      linkRel: linkEl ? linkEl.getAttribute('rel') : null,
       text: (el.querySelector('.cookie-banner__text') || {}).textContent,
       accept: (el.querySelector('.cookie-banner__btn--accept') || {}).textContent,
       decline: (el.querySelector('.cookie-banner__btn--decline') || {}).textContent,
@@ -222,6 +225,18 @@ const check = (ok, label, detail = '') => results.push({ ok, label, detail });
       (banner.decline || '').trim() === 'Отказаться',
       'Кнопка отказа называется «Отказаться»',
       `найдено «${(banner.decline || '').trim()}»`
+    );
+    // Ссылка на Политику cookie открывается в новом окне/вкладке — клик по
+    // ней не должен уводить со страницы, на которой висит баннер согласия.
+    check(
+      banner.linkTarget === '_blank',
+      'Ссылка на Политику cookie открывается в новом окне (target="_blank")',
+      `найдено target="${banner.linkTarget}"`
+    );
+    check(
+      (banner.linkRel || '').split(/\s+/).includes('noopener'),
+      'Ссылка на Политику cookie с rel="noopener" (защита от window.opener)',
+      `найдено rel="${banner.linkRel}"`
     );
   }
 
