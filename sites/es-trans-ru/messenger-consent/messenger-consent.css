@@ -45,12 +45,27 @@
 }
 
 .messenger-consent__link {
+	position: relative;
+	display: inline-block;
 	color: #dc2025;
-	text-decoration: underline;
+	line-height: 120%;
+	transition: color 0.3s ease;
 }
 
-.messenger-consent__link:hover {
-	text-decoration: none;
+.messenger-consent__link::before {
+	content: '';
+	position: absolute;
+	top: 103%;
+	left: 0;
+	width: 100%;
+	height: 2px;
+	background: #dc2025;
+}
+
+@media (any-hover: hover) {
+	.messenger-consent__link:hover {
+		color: #dc2025;
+	}
 }
 
 .messenger-consent__actions {
