@@ -47,7 +47,7 @@
 .messenger-consent__link {
 	position: relative;
 	display: inline-block;
-	color: #dc2025;
+	color: #000;
 	line-height: 120%;
 	transition: color 0.3s ease;
 }
