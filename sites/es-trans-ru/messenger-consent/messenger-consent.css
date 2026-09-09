@@ -55,7 +55,7 @@
 .messenger-consent__link::before {
 	content: '';
 	position: absolute;
-	top: 103%;
+	top: 94%;
 	left: 0;
 	width: 100%;
 	height: 2px;
@@ -64,7 +64,7 @@
 
 @media (any-hover: hover) {
 	.messenger-consent__link:hover {
-		color: #dc2025;
+		color: #6b6b68;
 	}
 }
 
