@@ -1,5 +1,45 @@
 # 🗓 История изменений
 
+## 2026-09-24 — ludmila-valentinova.ru: найден и закрыт источник мёртвого dns-prefetch
+
+Другой клиент/сайт (не es-trans.ru), WordPress на теме Shamrock. Задача
+косметическая (не 152-ФЗ) — в DevTools замечен неиспользуемый
+`<link rel="dns-prefetch" href="//use.fontawesome.com">` парой со
+скриптом `kirki-fontawesome-font-js`.
+
+Диагностика: тумблер «Асинхронный Fontawesome» в Clearfy уже был
+выключен (тег не пропадал) → осмотрены файлы темы (`functions.php`,
+`include/helpers.php`, `include/snippets.php`, `include/plugins.php`) —
+код не найден → по паре тег+скрипт и списку из 23 установленных
+плагинов (нет отдельного «Kirki»/«Font Awesome») установлено, что
+источник — **Kirki Customizer Toolkit**, вшитый в тему как библиотека
+(`include/options.php` → `include_once .../options/kirki.php`), а не
+плагин.
+
+Две попытки фикса результата не дали: (1) `wp_dequeue_script`/
+`wp_deregister_script('kirki-fontawesome-font-js')` на
+`wp_enqueue_scripts`; (2) фильтр `wp_resource_hints` — тег оставался
+даже после чистки кэша WP Fastest Cache и проверки, что WP-Optimize
+неактивен; прямой `curl` с cache-busting подтвердил, что дело не в
+кэше — фильтр просто не перехватывал этот тег (Kirki, по всей
+видимости, печатает его прямо в `wp_head`, минуя `wp_resource_hints()`).
+
+Сработал третий вариант — вырезание тега на уровне готового HTML:
+`add_action('template_redirect', ...)` + `ob_start()` с callback на
+`preg_replace()`. Правка внесена пользователем вручную в
+`functions.php` темы через wp-admin → Внешний вид → Редактор темы (в
+этой среде нет доступа к файлам сайта). Проверено дважды: скриншотом
+DevTools и независимо `curl` + `grep -c "dns-prefetch"` → `0`.
+
+Попутно: `<link rel="profile" href="https://gmpg.org/xfn/11">` — штатный
+тег ядра WordPress (XFN через `get_profile()`), не передаёт ПДн/IP —
+не нарушение 152-ФЗ.
+
+Подробности — в
+`sites/other/ludmila-valentinova.ru/audit-log-2026-08-19.md`.
+
+---
+
 ## 2026-09-09 — Аудит фиксации согласия по инструкции юрфирмы: найден и закрыт критический баг
 
 Пользователь прислал полный текст рекомендации юрфирмы (7 пунктов) по
