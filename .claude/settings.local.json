@@ -22,10 +22,12 @@
       "Bash(bash scripts/snapshot.sh \"добавлен cookie-consent баннер для es-trans.ru: cookie-banner.js/css, инструкция по внедрению, блокировка Метрики до согласия\")",
       "Bash(grep -v \"\\\\.pack$\")",
       "Bash(git fetch *)",
-      "Bash(bash scripts/snapshot.sh \"фикс upstream-трекинга main после пуша, ротация GitHub PAT\")"
+      "Bash(bash scripts/snapshot.sh \"фикс upstream-трекинга main после пуша, ротация GitHub PAT\")",
+      "Bash(rm -rf /home/my_workspace/website-customizer/.claude/skills/marketingskills/.git && echo done)"
     ],
     "additionalDirectories": [
-      "/home/my_workspace/website-customizer/.claude/skills/playwright-skill"
+      "/home/my_workspace/website-customizer/.claude/skills/playwright-skill",
+      "/home/my_workspace/website-customizer/.claude/skills/marketingskills/.git"
     ]
   },
   "mcpServers": {
